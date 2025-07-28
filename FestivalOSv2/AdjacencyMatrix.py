@@ -71,13 +71,14 @@ if __name__ == "__main__":
 
     """
 
-    POIs = [POI("X Booth",    [45.5239, -122.6755], MapManager.GREEN, MapManager.BOOTH),
-            POI("Y Booth",    [45.5239, -122.6759], MapManager.GREEN, MapManager.BOOTH),
-            POI("Z Booth",    [45.5239, -122.6765], MapManager.GREEN, MapManager.BOOTH)]
+    # Define Points of Interests (POIs) and Navigation Points (NavPoints)
+    POIs = [POI("X Booth",    [45.5239, -122.6755], MapManager.GREEN, MapManager.BOOTH, "TODO"),
+            POI("Y Booth",    [45.5242, -122.6759], MapManager.GREEN, MapManager.BOOTH, "TODO"),
+            POI("Z Booth",    [45.5239, -122.6765], MapManager.GREEN, MapManager.BOOTH, "TODO")]
 
-    NavPoints = [POI("Map Center", [45.5236, -122.6750], MapManager.BLUE, MapManager.NAV),
-                 POI("TouchScreen 1", [45.5236, -122.6750], MapManager.RED, MapManager.INFO),
-                 POI("Navigation Point 1", [45.5236, -122.6755], MapManager.BLACK, MapManager.NAV)]
+    NavPoints = [POI("Map Center", [45.5236, -122.6750], MapManager.BLUE, MapManager.NAV, "https://maps.app.goo.gl/6KYesGps9J3xgzvp6"),
+                 POI("TouchScreen 1", [45.5236, -122.6755], MapManager.RED, MapManager.INFO, "TODO"),
+                 POI("Navigation Point 1", [45.5236, -122.6759], MapManager.BLACK, MapManager.NAV, "TODO")]
 
     adjMatrix = AdjacencyMatrix(POIs, NavPoints)
     print(f"Printing POI's index 0: {adjMatrix.POI_S[0]}")

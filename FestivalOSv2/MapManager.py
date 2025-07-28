@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import folium
+from folium.plugins import FloatImage
+
 import os
 import base64
 
@@ -48,7 +50,22 @@ class MapManager:
         )
 
     def clear_map(self):
-            self.map.clear_layers()
+    #self.map.clear_layers()
+    # """Remove all markers, polylines, and overlays from the map"""
+    # Store the base map tiles
+        base_tiles = [child for child in self.map._children.values()
+                        if isinstance(child, folium.TileLayer)]
+
+        # Clear all children
+        self.map._children = {}
+
+        # Add back only the base tiles
+        for tile in base_tiles:
+            self.map.add_child(tile)
+
+        # Add back the layer control
+        folium.LayerControl().add_to(self.map)
+
 
     def add_marker(self, name: str, location: list, color: str, iconImage: str):
         """ Add a marker with one of the predefined CONSTANT colors and icon image
@@ -83,33 +100,6 @@ class MapManager:
             tooltip=name
         ))
 
-    def remove_path(self, name: str):
-        """
-        Remove a path (polyline) from the map by its name.
-
-        Args:
-            name (str): The name of the polyline to remove
-        """
-        print(f"Removing path: {name}")
-        def remove_path(self, name: str):
-            """
-            Remove a path (polyline) from the map by its name.
-
-            Args:
-                name (str): The name of the polyline to remove
-            """
-            # Find and remove the polyline with the given name
-            layers_to_remove = []
-
-            for layer in self.map._children.values():
-                if hasattr(layer, 'name') and layer.name == name:
-                    layers_to_remove.append(layer.get_name())
-
-            for layer_name in layers_to_remove:
-                self.map._children.pop(layer_name)
-
-
-
     def add_image(self, imgURI: str, cornerNW: list, cornerSE: list ):
         # https://gis.stackexchange.com/questions/458932/leaflet-image-overlay-align-with-pixel-coordinates-on-map
         # https://python-visualization.github.io/folium/latest/user_guide/raster_layers/image_overlay.html
@@ -124,18 +114,7 @@ class MapManager:
         # Create data URL
         dataURI = f"data:{mime_type};base64,{encoded_string}"
 
-
-        img = folium.raster_layers.ImageOverlay(
-            name="QR Code",
-            image=dataURI,
-            bounds=[cornerNW, cornerSE],
-            opacity=0.6,
-            interactive=False,
-            cross_origin=False,
-            zindex=1,
-        )
-        img.add_to(self.map)
-        folium.LayerControl().add_to(self.map)
+        FloatImage(dataURI, bottom=5, left=75).add_to(self.map)
 
     def save_map_to_html(self, map):
         # Save the map to an HTML file
