@@ -1,77 +1,60 @@
 #!/usr/bin/env python3
 
 from nicegui import ui
-import qrcode
-import os
 from POI import POI
+from QRCodeGenerator import QRCodeGenerator
 from AdjacencyMatrix import AdjacencyMatrix
 from MapManager import MapManager
 
-class QRCodeGenerator:
-
-    def __init__(self, data):
-        self.data = data
-
-    def generate(self):
-        qr = qrcode.QRCode(
-            version=2,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        qr.add_data(self.data)
-        qr.make(fit=True)
-
-        img = qr.make_image(fill_color="black", back_color="white")
-        img.save("QR_code.png")
-
-        currentDir = os.path.dirname(os.path.abspath(__file__))
-        imagePath = os.path.join(currentDir, 'QR_CODE.png')
-        imgURI = 'https://maps.lib.utexas.edu/maps/historical/newark_nj_1922.jpg' #f"file://{imagePath}" # 'https://drive.google.com/file/d/1mqIKAF13UkoVmjosC6bCc_c06DR_qXSC'
-        print(f"Corner 1: {corner1} & Corner 2: {corner2} using img: {imgURI}")
-
-        return imgURI
-
 if __name__ in {"__main__", "__mp_main__"}:
     complexCon = MapManager((45.5236, -122.6750))
-    #ui.timer(complexCon.clear_map(), interval=60)
 
     # Define Points of Interests (POIs) and Navigation Points (NavPoints)
-    POIs = [POI("X Booth",    [45.5239, -122.6755], MapManager.GREEN, MapManager.BOOTH),
-            POI("Y Booth",    [45.5239, -122.6759], MapManager.GREEN, MapManager.BOOTH),
-            POI("Z Booth",    [45.5239, -122.6765], MapManager.GREEN, MapManager.BOOTH)]
+    POIs = [POI("X Booth",    [45.5239, -122.6755], MapManager.GREEN, MapManager.BOOTH, "TODO"),
+            POI("Y Booth",    [45.5242, -122.6759], MapManager.GREEN, MapManager.BOOTH, "TODO"),
+            POI("Z Booth",    [45.5239, -122.6765], MapManager.GREEN, MapManager.BOOTH, "TODO")]
 
-    NavPoints = [POI("Map Center", [45.5236, -122.6750], MapManager.BLUE, MapManager.NAV),
-                 POI("TouchScreen 1", [45.5236, -122.6750], MapManager.RED, MapManager.INFO),
-                 POI("Navigation Point 1", [45.5236, -122.6755], MapManager.BLACK, MapManager.NAV)]
+    NavPoints = [POI("Map Center", [45.5236, -122.6750], MapManager.BLUE, MapManager.NAV, "https://maps.app.goo.gl/6KYesGps9J3xgzvp6"),
+                 POI("TouchScreen 1", [45.5236, -122.6755], MapManager.RED, MapManager.INFO, "TODO"),
+                 POI("Navigation Point 1", [45.5236, -122.6759], MapManager.BLACK, MapManager.NAV, "TODO")]
+
+    ui.timer(10, lambda: complexCon.remove_path(f"Directions from {POIs[0].name} to {POIs[1].name}"))
 
     adjMatrix = AdjacencyMatrix(POIs, NavPoints)
-    matrixIndex = [POIs[0], POIs[1], NavPoints[0], NavPoints[1], NavPoints[2]]
 
-    # Update POI IDs and add markers and poly path to map
     lastIdUsed = 0
     for i, poi in enumerate(POIs):
         poi.id = i
         complexCon.add_marker(poi.name, poi.location, poi.color, poi.iconImage)
         lastIdUsed = i
+        print(lastIdUsed)
 
+    nextId = lastIdUsed + 1
     for i, navPoint in enumerate(NavPoints):
-        navPoint.id = lastIdUsed + i
+        navPoint.id = nextId + i
+        print(navPoint.id)
         complexCon.add_marker(navPoint.name, navPoint.location, navPoint.color, navPoint.iconImage)
 
-
-    path = adjMatrix.find_path(POIs[0], POIs[1])
-    complexCon.add_path(f"Directions from {path[0].name} to {path[-1].name}", path, MapManager.RED, MapManager.INFO)
+    adjMatrix.define_adjacency_matrix()
 
 
-    # Generate QR code on map
-    data = "https://example.com"
+    path = adjMatrix.find_path(POIs[0].id, POIs[1].id)
+    locations = []
+    for point in POIs:
+        for id in path:
+            if point.id == id:
+                locations.append(point.location)
+
+    complexCon.add_path(f"Directions from {POIs[0].name} to {POIs[1].name}", locations, MapManager.RED, MapManager.INFO)
+
+    # Generate QR code
+
     #TODO mapZoomLevel = complexCon.get_zoom_level()
     offsetQR = [0.0, 0.0005]
     qrSize = 0.0005
     corner1 = [NavPoints[0].lat - (qrSize/2) + offsetQR[0], NavPoints[0].long - (qrSize/2) + offsetQR[1]]  #[36.127712, -115.149861]
     corner2 = [NavPoints[0].lat + (qrSize/2) + offsetQR[0], NavPoints[0].long + (qrSize/2) + offsetQR[1]]  #[36.129182, -115.154580]
-    qr = QRCodeGenerator(data)
+    qr = QRCodeGenerator(NavPoints[0].googleMapUrl)
     imgURI = qr.generate()
     complexCon.add_image(imgURI, corner1, corner2)
 
@@ -146,5 +129,6 @@ if __name__ in {"__main__", "__mp_main__"}:
     # Create a full-screen container with the HTML content
     ui.add_body_html(htmlContent)
 
+
     # Run the application in native OS window instead of browser
-    ui.run(native=True, title='ComplexCon Map', fullscreen=True) #TODO Remove scroll bar window_size=(1920, 1080),
+    ui.run(native=True, title='ComplexCon Map', fullscreen=False) #TODO Remove scroll bar window_size=(1920, 1080),

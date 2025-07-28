@@ -3,7 +3,7 @@ import MapManager
 
 class POI:
 
-    def __init__(self, name: str, location: list, color: str, iconImage: str):
+    def __init__(self, name: str, location: list, color: str, iconImage: str, googleMapUrl: str):
         """ Initialize a POI object with a name, location, color, and icon image.
             https://ionic.io/ionicons
         """
@@ -14,6 +14,7 @@ class POI:
         self.long = location[1]
         self.color = color
         self.iconImage = iconImage
+        self.googleMapUrl = googleMapUrl
 
     def __str__(self):
         return f"{self.name}"

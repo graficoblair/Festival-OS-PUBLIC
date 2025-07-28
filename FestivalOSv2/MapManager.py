@@ -2,6 +2,7 @@
 
 import folium
 import os
+import base64
 
 class MapManager:
 
@@ -70,12 +71,10 @@ class MapManager:
     def add_path(self, name: str, locations: list, color: str, iconImage: str):
         """ Add a path with one of the predefined CONSTANT colors and icon image
         """
-        pathCoordinates = []
-        for point in locations:
-            pathCoordinates.append(point.location)
-
+        #print(name)
         self.map.add_child(folium.PolyLine(
-            locations=pathCoordinates,
+            name=name,
+            locations=locations,
             popup=None,
             color=color,
             weight=5,
@@ -84,12 +83,51 @@ class MapManager:
             tooltip=name
         ))
 
+    def remove_path(self, name: str):
+        """
+        Remove a path (polyline) from the map by its name.
+
+        Args:
+            name (str): The name of the polyline to remove
+        """
+        print(f"Removing path: {name}")
+        def remove_path(self, name: str):
+            """
+            Remove a path (polyline) from the map by its name.
+
+            Args:
+                name (str): The name of the polyline to remove
+            """
+            # Find and remove the polyline with the given name
+            layers_to_remove = []
+
+            for layer in self.map._children.values():
+                if hasattr(layer, 'name') and layer.name == name:
+                    layers_to_remove.append(layer.get_name())
+
+            for layer_name in layers_to_remove:
+                self.map._children.pop(layer_name)
+
+
+
     def add_image(self, imgURI: str, cornerNW: list, cornerSE: list ):
         # https://gis.stackexchange.com/questions/458932/leaflet-image-overlay-align-with-pixel-coordinates-on-map
         # https://python-visualization.github.io/folium/latest/user_guide/raster_layers/image_overlay.html
+        # Read image file and encode as base64
+        with open(imgURI, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
+
+        # Get the file extension to determine mime type
+        file_ext = os.path.splitext(imgURI)[1].lower()
+        mime_type = "image/png" if file_ext == ".png" else "image/jpeg" if file_ext in [".jpg", ".jpeg"] else "image/gif"
+
+        # Create data URL
+        dataURI = f"data:{mime_type};base64,{encoded_string}"
+
+
         img = folium.raster_layers.ImageOverlay(
             name="QR Code",
-            image=imgURI,
+            image=dataURI,
             bounds=[cornerNW, cornerSE],
             opacity=0.6,
             interactive=False,
