@@ -9,7 +9,7 @@ class QRCodeGenerator:
     def __init__(self, data):
         self.data = data
 
-    def generate(self):
+    def generate(self, filename: str = "QR_code.png"):
         qr = qrcode.QRCode(
             version=2,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -20,11 +20,11 @@ class QRCodeGenerator:
         qr.make(fit=True)
 
         img = qr.make_image(fill_color="black", back_color="white")
-        img.save("QR_code.png")
-        imagePath = os.path.abspath("QR_code.png")
-        if QRCodeGenerator.DEBUG_STATEMENTS_ON: print(f"Corner 1: {corner1} & Corner 2: {corner2} using img: {imgURI}")
+        img.save(filename)
+        imagePath = os.path.abspath(filename)
 
         return imagePath
 
 if __name__ == "__main__":
-    pass
+    qr = QRCodeGenerator("https://google.com")
+    qr.generate("TestQR.png")

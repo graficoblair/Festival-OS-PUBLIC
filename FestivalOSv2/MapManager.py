@@ -30,10 +30,15 @@ class MapManager:
     ARROW_LEFT = 'arrow-left'
     ARROW_RIGHT = 'arrow-right'
 
-    def __init__(self, center: tuple, tileTheme: str = 'CartoDB dark_matter'):
+    # Map Title colors https://leaflet-extras.github.io/leaflet-providers/preview/
+
+    DARK_MODE_1 = 'CartoDB dark_matter'
+    DARK_MODE_2 = 'Stadia Alidade_Smooth_Dark'
+    LIGHT_MODE_1 = 'CartoDB Positron'
+
+    def __init__(self, center: list, tileTheme: str = DARK_MODE_2, map_rotation: float = 0.0):
         """ Initialize a MapManger object with a center location.
             https://python-visualization.github.io/folium/latest/getting_started.html
-            https://leaflet-extras.github.io/leaflet-providers/preview/
 
             Args:
                 center (tuple): The center location of the map.
@@ -46,13 +51,21 @@ class MapManager:
             zoom_start=20,
             tiles=tileTheme,
             zoom_control=False,
-            attributionControl= False
+            control_scale=True,
+            attributionControl=False
         )
 
+    # Create a function that will be called from the UI
+    def handle_clear_map(self):
+        self.clear_map()
+        self.map.save(f"map_{id(self)}.html")
+
     def clear_map(self):
-    #self.map.clear_layers()
-    # """Remove all markers, polylines, and overlays from the map"""
-    # Store the base map tiles
+        """ Remove all markers, polylines, and overlays from the map
+        """
+        print("Map cleared!!!")
+
+        # Store the base map tiles
         base_tiles = [child for child in self.map._children.values()
                         if isinstance(child, folium.TileLayer)]
 
@@ -62,9 +75,6 @@ class MapManager:
         # Add back only the base tiles
         for tile in base_tiles:
             self.map.add_child(tile)
-
-        # Add back the layer control
-        folium.LayerControl().add_to(self.map)
 
 
     def add_marker(self, name: str, location: list, color: str, iconImage: str):
@@ -100,10 +110,11 @@ class MapManager:
             tooltip=name
         ))
 
-    def add_image(self, imgURI: str, cornerNW: list, cornerSE: list ):
+    def add_image(self, imgURI: str):
         # https://gis.stackexchange.com/questions/458932/leaflet-image-overlay-align-with-pixel-coordinates-on-map
         # https://python-visualization.github.io/folium/latest/user_guide/raster_layers/image_overlay.html
         # Read image file and encode as base64
+        print("Adding QR code image")
         with open(imgURI, "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
 

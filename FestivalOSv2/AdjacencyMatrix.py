@@ -5,7 +5,7 @@ from MapManager import MapManager
 
 class AdjacencyMatrix:
 
-    DEBUG_STATEMENTS_ON = True
+    DEBUG_STATEMENTS_ON = False
 
     def __init__(self, pointsOfInterest: list, navPoints: list):
         """
@@ -23,7 +23,7 @@ class AdjacencyMatrix:
 
         self.paths = [[[0] for _ in range(self.num_vertices)] for _ in range(self.num_vertices)]
 
-        print(f"Adjacency Matrix initialized with {self.num_vertices} vertices")
+        if AdjacencyMatrix.DEBUG_STATEMENTS_ON: print(f"Adjacency Matrix initialized with {self.num_vertices} vertices")
 
 
     def add_edge(self, startPoint: POI, endPoint: POI, length: int, path: list[int]):
@@ -36,8 +36,8 @@ class AdjacencyMatrix:
         if AdjacencyMatrix.DEBUG_STATEMENTS_ON: print(f"Adjacency Matrix updated to {self.matrix}")
 
     def define_adjacency_matrix(self):
-        self.add_edge(self.POI_S[0], self.POI_S[1], 2, [self.POI_S[0].id, self.NAV_POINTS[0].id, self.POI_S[1].id])
-        self.add_edge(self.POI_S[0], self.POI_S[2], 3, [self.POI_S[0].id, self.NAV_POINTS[0].id, self.NAV_POINTS[1].id, self.POI_S[2].id])
+        self.add_edge(self.POI_S[0], self.POI_S[1], 2, [self.POI_S[0].id, self.NAV_POINTS[1].id, self.POI_S[1].id])
+        self.add_edge(self.POI_S[0], self.POI_S[2], 3, [self.POI_S[0].id, self.NAV_POINTS[1].id, self.NAV_POINTS[1].id, self.POI_S[2].id])
         self.add_edge(self.POI_S[1], self.POI_S[2], 2, [self.POI_S[1].id, self.NAV_POINTS[2].id, self.POI_S[2].id])
 
 
@@ -61,6 +61,12 @@ class AdjacencyMatrix:
 
     def find_length(self, u, v):
         return self.matrix[u][v]
+
+    def new_map_center(self, startPoint: POI, endPoint: POI):
+        newLat = (startPoint.location[0] + endPoint.location[0]) * 0.5
+        newLong = (startPoint.location[1] + endPoint.location[1]) * 0.5
+
+        return [newLat, newLong]
 
 if __name__ == "__main__":
     """ https://www.mermaidchart.com/play#pako:eNqrVkrOT0lVslJKy8kvT85ILCpR8AmKyVMAgoD8zLwSQwUbXV07Bb_EMmQumG1MUBmMa4SkywhJlxGqMmNkw5VqAUQsLjM
@@ -94,8 +100,8 @@ if __name__ == "__main__":
 
 
     # Add 3 edges for ["Point0", "Point1", "Point2", "NavPoint0", "NavPoint1", "NavPoint2"]
-    adjMatrix.add_edge(adjMatrix.POI_S[0], adjMatrix.POI_S[1], 2, [adjMatrix.POI_S[0].id, adjMatrix.NAV_POINTS[0].id, adjMatrix.POI_S[1].id])
-    adjMatrix.add_edge(adjMatrix.POI_S[0], adjMatrix.POI_S[2], 3, [adjMatrix.POI_S[0].id, adjMatrix.NAV_POINTS[0].id, adjMatrix.NAV_POINTS[1].id, adjMatrix.POI_S[2].id])
+    adjMatrix.add_edge(adjMatrix.POI_S[0], adjMatrix.POI_S[1], 2, [adjMatrix.POI_S[0].id, adjMatrix.NAV_POINTS[2].id, adjMatrix.POI_S[1].id])
+    adjMatrix.add_edge(adjMatrix.POI_S[0], adjMatrix.POI_S[2], 3, [adjMatrix.POI_S[0].id, adjMatrix.NAV_POINTS[2].id, adjMatrix.NAV_POINTS[1].id, adjMatrix.POI_S[2].id])
     adjMatrix.add_edge(adjMatrix.POI_S[1], adjMatrix.POI_S[2], 2, [adjMatrix.POI_S[1].id, adjMatrix.NAV_POINTS[2].id, adjMatrix.POI_S[2].id])
 
     distance = adjMatrix.find_length(0, 1)

@@ -1,0 +1,58 @@
+ """
+    <button onclick="window.complexCon_clear_map()"
+    style="position:absolute; top:50px; right:50px; z-index:999;
+        background-color:white; border:2px solid #ccc;
+        border-radius:5px; padding:15px 20px;">
+    <h2> Clear Map </h2>
+    </button>
+
+    <script>
+        window.complexCon_clear_map = function() {
+            window.parent.postMessage({action: 'clear_map'}, '*');
+        }
+    </script>
+    """
+
+
+# Add the clear_map method to complexCon
+import types
+complexCon.clear_map = types.MethodType(clear_map, complexCon)
+
+# Create a unique function name for our JavaScript function
+import random
+import string
+function_id = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+
+# Create a Python function that will be exposed to JavaScript
+def handle_clear_map():
+    complexCon.clear_map()
+
+# Expose this function to JavaScript
+from nicegui import app
+app.add_route(f'/api/clear_map_{function_id}', lambda: handle_clear_map(), methods=['POST'])
+
+# Create the HTML button that makes an AJAX call to our endpoint
+button_html = f"""
+<button
+    id="clear-map-btn-{function_id}"
+    style="position:absolute; top:10px; right:10px; z-index:999;
+           background-color:white; border:2px solid #ccc;
+           border-radius:5px; padding:5px 10px;">
+    Clear Map
+</button>
+
+<script>
+    document.getElementById('clear-map-btn-{function_id}').onclick = function() {{
+        fetch('/api/clear_map_{function_id}', {{method: 'POST'}})
+            .then(response => {{
+                if (response.ok) {{
+                    console.log('Map cleared successfully');
+                }}
+            }})
+            .catch(error => console.error('Error clearing map:', error));
+    }};
+</script>
+"""
+
+# Add the button HTML to the page
+ui.add_body_html(button_html)
